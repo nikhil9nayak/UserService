@@ -22,7 +22,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@RequestBody LoginRequestDto request) {
         return authService.login(request.getEmail(), request.getPassword());
-//        return null;
     }
 
     @PostMapping("/logout")
@@ -39,7 +38,6 @@ public class AuthController {
     @PostMapping("/validate")
     public ResponseEntity<SessionStatus> validateToken(ValidateTokenRequestDto request) {
         SessionStatus sessionStatus = authService.validate(request.getToken(), request.getUserId());
-
         return new ResponseEntity<>(sessionStatus, HttpStatus.OK);
     }
 

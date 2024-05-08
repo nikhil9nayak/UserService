@@ -10,6 +10,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMapAdapter;
 
@@ -21,21 +22,24 @@ public class AuthService {
     private UserRepository userRepository;
     private SessionRepository sessionRepository;
 
-    public AuthService(UserRepository userRepository, SessionRepository sessionRepository) {
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public AuthService(UserRepository userRepository, SessionRepository sessionRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public ResponseEntity<UserDto> login(String email, String password) {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
-        if (userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {  // Checking whether User is not present in DB, If not return null
             return null;
         }
 
         User user = userOptional.get();
 
-        if (!user.getPassword().equals(password)) {
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {  // Trying to match, user given pw with DB stored pw
             return null;
         }
 
@@ -48,6 +52,7 @@ public class AuthService {
         sessionRepository.save(session);
 
         UserDto userDto = new UserDto();
+        userDto.setEmail(email);
 
 //        Map<String, String> headers = new HashMap<>();
 //        headers.put(HttpHeaders.SET_COOKIE, token);
@@ -82,7 +87,7 @@ public class AuthService {
     public UserDto signUp(String email, String password) {
         User user = new User();
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(bCryptPasswordEncoder.encode(password)); // encrypting the pw and storing in DB
 
         User savedUser = userRepository.save(user);
 

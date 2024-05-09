@@ -165,9 +165,9 @@ public class AuthService {
         String email = (String)jwsClaims.getPayload().get("email");
         List<Role> roles = (List<Role>) jwsClaims.getPayload().get("roles");
         Date createAt = (Date) jwsClaims.getPayload().get("createdAt");
-        if(restrictedEmails.contains(email)){
-            //reject the token
-        }
+//        if(restrictedEmails.contains(email)){
+//            //reject the token
+//        }
 
 
 

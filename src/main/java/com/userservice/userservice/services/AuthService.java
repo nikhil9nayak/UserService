@@ -1,11 +1,14 @@
 package com.userservice.userservice.services;
 
 import com.userservice.userservice.dtos.UserDto;
+import com.userservice.userservice.models.Role;
 import com.userservice.userservice.models.Session;
 import com.userservice.userservice.models.SessionStatus;
 import com.userservice.userservice.models.User;
 import com.userservice.userservice.repositories.SessionRepository;
 import com.userservice.userservice.repositories.UserRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.MacAlgorithm;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -137,11 +140,36 @@ public class AuthService {
     }
 
     public SessionStatus validate(String token, Long userId) {
-        Optional<Session> sessionOptional = sessionRepository.findByTokenAndUser_Id(token, userId);
 
+        // Checking if session is not present return null, else return ACTIVE
+        Optional<Session> sessionOptional = sessionRepository.findByTokenAndUser_Id(token, userId);
         if (sessionOptional.isEmpty()) {
             return null;
         }
+
+        // Checking if session is Ended or Active
+        Session session = sessionOptional.get();
+        if(!session.getSessionStatus().equals(SessionStatus.ACTIVE)){
+            return SessionStatus.ENDED;
+        }
+
+        // Checking if session is ended before current time
+        Date currenTime = new Date();
+        if(session.getExpiringAt().before(currenTime)){
+            return SessionStatus.ENDED;
+        }
+
+        // JWT Decoding...
+        // To check the JWT token is valid for this particular user, we have to fetch all the info from Payload then only we can validate/match. This is called Decoding
+        Jws<Claims> jwsClaims = Jwts.parser().build().parseSignedClaims(token);
+        String email = (String)jwsClaims.getPayload().get("email");
+        List<Role> roles = (List<Role>) jwsClaims.getPayload().get("roles");
+        Date createAt = (Date) jwsClaims.getPayload().get("createdAt");
+        if(restrictedEmails.contains(email)){
+            //reject the token
+        }
+
+
 
         return SessionStatus.ACTIVE;
     }

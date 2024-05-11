@@ -84,25 +84,30 @@ public class SecurityConfig { // This ready-made class is available in docs.spri
         return http.build();
     }
 
+    /* We are Commenting this method bcoz, instead of fetching default username and pw from default InMemory when a user login,
+                                           we will implement our own CustomSpringUserDetail class to fetch the user details from DB
+
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService() { // this is the default user and password SecurityConfig s providing me to test the changes
         UserDetails userDetails = User.builder()
                 .username("user")
                 .password(bCryptPasswordEncoder.encode("password"))
                 .roles("USER")
                 .build();
 
-        return new InMemoryUserDetailsManager(userDetails);
+        return new InMemoryUserDetailsManager(userDetails); // They're using InMemory to store the user and pw details temporarily
     }
+     */
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("oidc-client")
-                .clientSecret("{noop}secret")
+                .clientId("productservice")
+                .clientSecret(bCryptPasswordEncoder.encode("productservicesecret"))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/oidc-client")
                 .postLogoutRedirectUri("http://127.0.0.1:8080/")
                 .scope(OidcScopes.OPENID)

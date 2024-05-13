@@ -88,6 +88,14 @@
             <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>9.22.3</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
